@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html>
+    
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>AJAX: Movie Finder</title>
+
+    <style>
+
+        .Container {
+            padding-left: 7px;
+            padding-right: 7px;
+            padding-top: 22px;
+            padding-bottom: 22px;
+        }
+
+        .Title {
+            text-align: center;
+        }
+
+        .Search_Div {
+            text-align: center;
+        }
+
+        .Search_Div input {
+            margin-right: 3px;
+            min-width: 142px;
+            border: -1px;
+            border-color: rgba(42, 89, 218, 0.777);
+            border-radius: 3px;
+        }
+
+        .Search_Div input:focus-visible {
+            outline: none;
+            box-shadow: 0px 0px 1px 2px rgba(42, 89, 218, 0.333);
+        }
+
+        #Search_Span {
+            display: none;
+            white-space: pre;
+        }
+
+        .Search_Button {
+            margin-right: 3px;
+            background-color: rgba(42, 162, 218, 0.777);
+            border: -1px;
+            border-radius: 3px;
+            border-color: rgba(42, 89, 218, 0.777);
+        }
+
+        .Search_Button:hover {
+            box-shadow: 0px 0px 1px 2px rgba(42, 89, 218, 0.333);
+        }
+
+        .Search_Lucky {
+            border: -1px;
+            border-radius: 3px;
+        }
+
+        .Result_Field {
+            text-align: start;
+            margin-top: 2em;
+            padding-left: 3vw;
+            padding-right: 3vw;
+        }
+
+        .Result_Field h3 span, .Result_Field img {
+            display: none;
+            font-size: medium;
+            font-weight: lighter;
+        }
+
+        .Row {
+            display: flex;
+            max-width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .Column {
+            display: inline-block;
+            max-width: max-content;
+            margin-right: 20px;
+            margin-bottom: 30px;
+        }
+
+    </style>
+
+  <link rel="stylesheet" href="https://127.0.0.1:49874/stylesheet?id=i0cTXQtK3plmg8RK"></head>
+
+  <body>
+
+    <div class="Container">
+
+        <div class="Title">
+
+            <h1>AJAX: Movie Finder</h1>
+
+        </div>
+
+        <div class="Search_Div">
+
+            <span id="Search_Span"></span><input id="Search_Input" type="text" value="" placeholder="Search here..."><!--
+            --><button class="Search_Button" onclick="srchMovie()">Search</button><!--
+            --><button class="Search_Lucky" onclick="">I'm feeling lucky!</button>
+
+        </div>
+
+        <div class="Result_Field">
+
+            <div class="Row">
+
+                <!--<div class="Column">
+
+                    <img id="Poster" src="">
+
+                </div>
+
+                <div class="Column">
+
+                    <h3 style="margin-top: 0;">Title: <span id="Title"></span></h3>
+
+                    <h3>Year: <span id="Year"></span></h3>
+                    
+                    <h3>imdbID: <span id="imdbID"></span></h3>
+                    
+                    <h3>Type: <span id="Type"></span></h3>
+
+                </div>-->
+                
+            </div>
+        
+        </div>
+
+    </div>
+
+    
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    
+    <script>
+
+        // jQuery function to expand Search_Input
+        $(function() {
+
+            $('#Search_Span').text($('#Search_Input').val());
+            $('#Search_Input').width($('#Search_Span').width());
+
+        }).on('input', function() {
+
+            $('#Search_Span').text($('#Search_Input').val());
+            $('#Search_Input').width($('#Search_Span').width());
+
+            $('.Column').hide(500, function() {
+
+                $(this).remove();
+
+            });
+
+            //$('.Column').remove();
+
+        });
+
+        // jQuery function to set random background-color to Search_Lucky
+        $(function () {
+
+            $('.Search_Lucky').on('mouseenter', function() {
+
+                // function to limit values for "clrX" variables
+                function getRandomArbitrary(min, max) {
+
+                    return Math.random() * (max - min) + min;
+                    
+                };
+
+                var clrR = Math.floor(getRandomArbitrary(50, 250));
+                var clrG = Math.floor(getRandomArbitrary(50, 250));
+                var clrB = Math.floor(getRandomArbitrary(50, 250));
+                var clrA = getRandomArbitrary(0.333, 0.888);
+
+                $(this).css('background-color', 'rgba(' + clrR + ',' + clrG + ',' + clrB + ',' + clrA + ')');
+
+            });
+
+        });
+
+        var httpRequest = new XMLHttpRequest();
+                
+        httpRequest.onload = function() {
+
+            if (httpRequest.readyState === XMLHttpRequest.DONE) {
+
+                if (httpRequest.status === 200) {
+
+                    console.log(httpRequest.responseText);
+
+                    var json = JSON.parse(httpRequest.responseText);
+
+                    console.log(json);
+                    
+                    if (json.Error) {
+
+                        var errorMsg = () => {
+
+                            var msg = $('<div class="Column" style="margin-left: auto; margin-right: auto;"> \
+                                <h1>No movie found...search again.</h1> \
+                                </div>').hide().fadeIn();
+                            
+                            $(".Row").prepend(msg);
+
+                        };
+                        errorMsg();
+
+                    } else {
+
+                        for (i = json.Search.length; i--;) {
+
+                        // variables go here
+                        var poster = json.Search[i].Poster;
+                        var title = json.Search[i].Title;
+                        var year = json.Search[i].Year;
+                        var imdbID = json.Search[i].imdbID;
+                        var type = json.Search[i].Type;
+
+                        var addNext = () => {
+
+                            var nextMovie = $('<div class="Column"> \
+                                    <img id="Poster" src=""> \
+                                </div> \
+                                <div class="Column"> \
+                                    <h3 style="margin-top: 0;">Title: <a href="https://www.imdb.com/title/'+imdbID+'" target="_blank"><span id="Title"></span></a></h3> \
+                                    <h3>Year: <span id="Year"></span></h3> \
+                                    <h3>imdbID: <span id="imdbID"></span></h3> \
+                                    <h3>Type: <span id="Type"></span></h3> \
+                                </div>').hide().fadeIn();
+
+                            // append to Result_Field
+                            $(".Row").prepend(nextMovie);
+
+                            // selectors go here with fadeIn
+                            $("#Poster").attr("src", poster).fadeIn();
+                            $("#Title").html(title).fadeIn();
+                            $("#Year").html(year).fadeIn();
+                            $("#imdbID").html(imdbID).fadeIn();
+                            $("#Type").html(type).fadeIn();
+
+                        };
+                        
+                        addNext();
+
+                        continue;
+
+                        };
+                
+                    };
+                    
+                } else {
+
+                    console.log(httpRequest.statusText);
+
+                };
+
+            } else {};
+
+        };
+
+        httpRequest.onerror = function() {
+
+            console.log(httpRequest.statusText);
+
+        };
+
+        var srchMovie = function () {
+
+            var input = $("#Search_Input").val();
+            console.log(input);
+            
+            if (input) {
+
+                httpRequest.open('GET', 'https://www.omdbapi.com/?s=' + input + '&plot=short&apikey=b7da8d63');
+                httpRequest.send(null);
+
+            } else {};
+            
+        };
+        
+
+    </script>
+    
+    </body>
+
+</html>
